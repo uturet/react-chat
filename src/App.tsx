@@ -1,25 +1,24 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import {getAuth} from 'firebase/auth';
+import {getDatabase} from 'firebase/database';
+import {
+  AuthProvider,
+  DatabaseProvider,
+  useFirebaseApp,
+} from 'reactfire';
+import Guard from './Guard';
 
 function App() {
+  const app = useFirebaseApp();
+  const database = getDatabase(app);
+  const auth = getAuth(app);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <AuthProvider sdk={auth}>
+      <DatabaseProvider sdk={database}>
+        <Guard/>
+      </DatabaseProvider>
+    </AuthProvider>
   );
 }
 
