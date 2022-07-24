@@ -5,6 +5,7 @@ import Auth from './Auth';
 
 const Guard = () => {
   const user = useUser();
+  console.log(user);
   return (
     <>
       {user.data ? <Main/> : <Auth/>}

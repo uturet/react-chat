@@ -9,3 +9,7 @@
 .left-screen {
     left: -100vw;
 }
+
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}

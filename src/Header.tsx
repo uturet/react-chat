@@ -24,7 +24,7 @@ const Header: React.FunctionComponent<HeaderProps> = ({displayUsers, toggleDispl
                 </div>
               </div>
             </div>
-            <div className="absolute inset-y-0 left-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
+            <div className="absolute inset-y-0 left-10 md:left-0 flex items-center pr-2 sm:static sm:inset-auto sm:pr-0">
               <div className="ml-3 relative">
                 <div className='flex flex-row'>
                   <span className="h-10 w-10  bg-gray-800 flex rounded-full" id="user-menu-button" aria-expanded="false" aria-haspopup="true">
