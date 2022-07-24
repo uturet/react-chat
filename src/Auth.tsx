@@ -24,10 +24,10 @@ const IconButton: React.FunctionComponent<IconButtonProps> = ({makeAuth, path}) 
     <button
       onClick={makeAuth}
       type="submit"
-      className="group relative flex justify-center py-1 px-6 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+      className="group relative flex justify-center py-1 px-6 border border-transparent text-sm font-medium rounded-md bg-slate-700 text-white hover:bg-slate-500">
       <span className="">
         <svg
-          className="h-5 w-5 text-indigo-300 group-hover:text-indigo-400"
+          className="h-5 w-5 text-slate-100 group-hover:text-slate-200"
           fill="currentColor"
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 488 512"

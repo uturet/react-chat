@@ -1,3 +1,11 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.pointer {
+    cursor: pointer;
+}
+
+.left-screen {
+    left: -100vw;
+}
