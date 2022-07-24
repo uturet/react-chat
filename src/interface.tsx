@@ -4,15 +4,11 @@ export interface UserInterface {
     displayName: string
     photoURL: string
     uid: string
-    chats: UserChatInterface[]
-}
-
-export interface UserChatInterface {
-    user: UserInterface
-    chat: ChatInterface
+    chats: ChatInterface[]
 }
 
 export interface ChatInterface {
+    user: UserInterface
     messages: MessageInterface[]
 }
 

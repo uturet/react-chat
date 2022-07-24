@@ -2,15 +2,20 @@ import React from 'react';
 import {useUser} from 'reactfire';
 import Main from './Main';
 import Auth from './Auth';
+import {CurChatProvider} from './CurChatContext';
 
 const Guard = () => {
   const user = useUser();
-  console.log(user);
-  return (
-    <>
-      {user.data ? <Main/> : <Auth/>}
-    </>
-  );
+
+  if (user.data) {
+    return (
+      <CurChatProvider>
+        <Main/>
+      </CurChatProvider>
+    );
+  }
+
+  return <Auth/>;
 };
 
 export default Guard;

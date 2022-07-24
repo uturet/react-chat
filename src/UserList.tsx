@@ -8,13 +8,16 @@ import {
   collection,
 } from 'firebase/firestore';
 import {UserInterface} from './interface';
+import {useCurChat} from './CurChatContext';
 
 interface UserItemProps {
   user: UserInterface
+  active: boolean
+  onClick: () => void
 }
-export const UserItem: React.FunctionComponent<UserItemProps> = ({user}) => {
+export const UserItem: React.FunctionComponent<UserItemProps> = ({user, active, onClick}) => {
   return (
-    <div className='w-full h-[65px] border-solid border-slate-800 border-b-2 flex flex-row items-center px-3'>
+    <div onClick={onClick} className={`${active && 'bg-slate-600'} w-full h-[65px] border-solid border-slate-800 border-b-2 flex flex-row items-center px-3`}>
       <div className='w-10 h-10 relative'>
         <img className='rounded-full' src={user.photoURL} alt="User`s Photo" />
         {user.online && <span className='w-3 h-3 bg-green-400 rounded-full absolute right-0 bottom-0' />}
@@ -39,14 +42,18 @@ const UserList: React.FunctionComponent<UserListProps> = ({displayUsers}) => {
   const user = useUser();
   const usersRef = collection(firestore, 'users');
   const {status, data: users} = useFirestoreCollectionData(usersRef);
+  const [curChat, setCurChat] = useCurChat();
 
   if (status === 'loading') {
     return <span>loading...</span>;
   }
-  console.log('CLG', users, user);
   return (
     <section className={`${displayUsers? 'left-0': 'left-screen'} w-full overflow-y-scroll scrollbar-hide min-h-full bg-slate-700 border-solid border-slate-800 border-r-2 absolute md:static transition-all md:w-2/5 xl:w-1/4`}>
-      {users.map((u) => user.data?.uid == u.uid ? null : <UserItem key={u.uid} user={u as UserInterface}/>)}
+      {users.map((u) => user.data?.uid == u.uid ? null : <UserItem
+        onClick={() => setCurChat({user: u as UserInterface, messages: []})}
+        active={curChat?.user.uid === u.uid}
+        user={u as UserInterface}
+        key={u.uid}/>)}
     </section>
   );
 };
