@@ -14,7 +14,7 @@ function App() {
   const auth = getAuth(app);
   const {status, data: firestoreInstance} = useInitFirestore(async (firebaseApp) => {
     const db = initializeFirestore(firebaseApp, {});
-    await enableIndexedDbPersistence(db);
+    await enableIndexedDbPersistence(db, {forceOwnership: true});
     return db;
   });
 
