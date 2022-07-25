@@ -43,7 +43,13 @@ const ChatProvider = (props: any) => {
         return;
       }
     }
-
+    const tmpCurChat: ChatInterface = {
+      users: [u.uid],
+      typing: [],
+      user: u,
+      messages: [],
+    };
+    setCurChat(tmpCurChat);
     const docRef = await addDoc(collection(firestore, 'chats'), {
       users: [u.uid, user.data?.uid],
       typing: [],
