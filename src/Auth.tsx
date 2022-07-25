@@ -51,12 +51,11 @@ const Auth = () => {
   const makeAuth = (provider: AuthProvider) => {
     signInWithPopup(auth, provider)
       .then(async (result) => {
-        console.log('RESULT', result);
         const isFirstLogin = getAdditionalUserInfo(result)?.isNewUser;
         if (isFirstLogin) await pushUser(result);
       })
       .catch((error) => {
-        console.log(error);
+        console.error(error);
       });
   };
 

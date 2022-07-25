@@ -13,3 +13,17 @@
 .scrollbar-hide::-webkit-scrollbar {
     display: none;
 }
+.textarea {
+    box-sizing: border-box;
+    border: none;
+    border-radius: none;
+    overflow-y: scroll;
+    resize: none;
+  }
+
+.textarea:focus,
+.textarea:active {
+    outline: none;
+    border: none;
+    border-radius: none;
+}

@@ -2,16 +2,16 @@ import React from 'react';
 import {useUser} from 'reactfire';
 import Main from './Main';
 import Auth from './Auth';
-import {CurChatProvider} from './CurChatContext';
+import {ChatProvider} from './ChatContext';
 
 const Guard = () => {
   const user = useUser();
 
   if (user.data) {
     return (
-      <CurChatProvider>
+      <ChatProvider>
         <Main/>
-      </CurChatProvider>
+      </ChatProvider>
     );
   }
 

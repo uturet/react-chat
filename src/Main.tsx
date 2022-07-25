@@ -3,18 +3,18 @@ import React, {useState, useEffect} from 'react';
 import Header from './Header';
 import UserList from './UserList';
 import Chat from './Chat';
-import {useCurChat} from './CurChatContext';
+import {useChat} from './ChatContext';
 
 const Main = () => {
   const [displayUsers, setDisplayUsers] = useState(false);
   const toggleDisplayUsers = () => setDisplayUsers((prev) => !prev);
-  const [, setCurChat] = useCurChat();
+  const [,, selectCurChat] = useChat();
 
   useEffect(() => {
     const keyDownHandler = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         event.preventDefault();
-        setCurChat(null);
+        selectCurChat();
       }
     };
     document.addEventListener('keydown', keyDownHandler);

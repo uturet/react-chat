@@ -1,18 +1,19 @@
 export interface UserInterface {
     online: boolean
-    typing: boolean
     displayName: string
     photoURL: string
     uid: string
-    chats: ChatInterface[]
 }
 
 export interface ChatInterface {
-    user: UserInterface
+    user?: UserInterface // not stored
+    users: string[] // uid[]
+    typing: string[] // uid[]
     messages: MessageInterface[]
 }
 
 export interface MessageInterface {
+    sender: string // user.uid
     timestamp: number
     viewed: boolean
     content: string
