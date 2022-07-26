@@ -1,21 +1,22 @@
 import React, {createContext, useContext, useEffect, useState, useReducer} from 'react';
 import {ChatInterface, UserInterface, LocalChatInterface} from './interface';
 import {useFirestore, useUser} from 'reactfire';
-import {collection, query, where, onSnapshot, addDoc} from 'firebase/firestore';
+import {collection, query, where, onSnapshot, addDoc, updateDoc} from 'firebase/firestore';
 
 const ChatContext = createContext(null);
 
-const initialCurChat = {chat: null};
+const initialCurChat: {chat: LocalChatInterface|null} = {chat: null};
 
-function reducer(state: any, action: any) {
-  console.log('Dispatch', state, action);
+function reducer(state: {chat: LocalChatInterface|null}, action: {type: string, chat?: LocalChatInterface}) {
   switch (action.type) {
   case 'set':
-    state.chat = action.chat;
+    state.chat = action.chat as LocalChatInterface;
+    viewMessages(state.chat);
     break;
   case 'update':
     if (state.chat) {
-      state.chat = action.chat;
+      state.chat = action.chat as LocalChatInterface;
+      viewMessages(state.chat);
     }
     break;
   case 'empty':
@@ -25,10 +26,25 @@ function reducer(state: any, action: any) {
   return {...state};
 }
 
+const viewMessages = async (chat: LocalChatInterface) => {
+  let update = false;
+  for (let i=chat.messages.length-1; i>-1; i--) {
+    if (!chat.messages[i].viewed && chat.messages[i].sender == chat.user.uid) {
+      chat.messages[i].viewed = true;
+      update = true;
+    } else {
+      break;
+    }
+  }
+  if (update && chat.ref) {
+    await updateDoc(chat.ref, {
+      messages: chat.messages,
+    });
+  }
+};
 
 const ChatProvider = (props: any) => {
   const [curChat, dispatchCurChat] = useReducer(reducer, initialCurChat);
-  // const [curChat, setCurChat] = useState<LocalChatInterface|null>(null);
   const [chats, setChats] = useState<ChatInterface[]>([]);
   const [typingUsers, setTypingUsers] = useState<Set<string>>(new Set());
   const user = useUser();
@@ -51,7 +67,6 @@ const ChatProvider = (props: any) => {
           dispatchCurChat({type: 'update', chat: {...c, user: curChat.chat.user}});
         }
       });
-      console.log('Message', curChat.chat);
       setChats(tmpChats);
       setTypingUsers(tmpTypingUsers);
     });
@@ -59,7 +74,6 @@ const ChatProvider = (props: any) => {
 
 
   const selectCurChat = async (u?: UserInterface) => {
-    console.log('SelectCurChat', u);
     if (u === undefined) {
       dispatchCurChat({type: 'empty'});
       return;

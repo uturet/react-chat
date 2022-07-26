@@ -6,9 +6,11 @@ import {
   Timestamp,
   updateDoc,
   arrayUnion,
+  arrayRemove,
 } from 'firebase/firestore';
 
-
+// eslint-disable-next-line new-cap
+const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 const checkIcons = {
   double: <path d="M182.6 246.6C170.1 259.1 149.9 259.1 137.4 246.6L57.37 166.6C44.88 154.1 44.88 133.9 57.37 121.4C69.87 108.9 90.13 108.9 102.6 121.4L159.1 178.7L297.4 41.37C309.9 28.88 330.1 28.88 342.6 41.37C355.1 53.87 355.1 74.13 342.6 86.63L182.6 246.6zM182.6 470.6C170.1 483.1 149.9 483.1 137.4 470.6L9.372 342.6C-3.124 330.1-3.124 309.9 9.372 297.4C21.87 284.9 42.13 284.9 54.63 297.4L159.1 402.7L393.4 169.4C405.9 156.9 426.1 156.9 438.6 169.4C451.1 181.9 451.1 202.1 438.6 214.6L182.6 470.6z"/>,
   single: <path d="M438.6 105.4C451.1 117.9 451.1 138.1 438.6 150.6L182.6 406.6C170.1 419.1 149.9 419.1 137.4 406.6L9.372 278.6C-3.124 266.1-3.124 245.9 9.372 233.4C21.87 220.9 42.13 220.9 54.63 233.4L159.1 338.7L393.4 105.4C405.9 92.88 426.1 92.88 438.6 105.4H438.6z"/>,
@@ -18,20 +20,22 @@ interface MessageProps {
   content: string
   own: boolean
   viewed: boolean
+  timestamp: string
 }
-const Message: React.FunctionComponent<MessageProps> = ({own, viewed, content}) => {
+const Message: React.FunctionComponent<MessageProps> = ({own, viewed, content, timestamp}) => {
   return (
-    <div className={`max-w-[400px] p-3 m-2 bg-slate-700 text-slate-200 rounded-xl ${!own && 'self-end'}`}>
-      <div id='message' className='text-slate-500 message-metadata'>
-        <div className='float-right'></div>
-        <div className='float-right flex flex-row pl-4 font-semibold whitespace-nowrap'>timestamp<svg
-          className="ml-3 h-5 w-5 text-slate-500"
-          fill="currentColor"
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 488 512"
-          aria-hidden="true">{viewed ? checkIcons.double : checkIcons.single}</svg></div>
+    <div className={`max-w-[400px] p-3 m-2 bg-slate-700 rounded-xl ${own && 'self-end'}`}>
+      <div>
+        <p className='text-justify  text-slate-200'>{content}</p>
+        <div className='float-right text-slate-500 flex flex-row pl-4 font-semibold text-sm whitespace-nowrap'>{timestamp}
+          {own && <svg
+            className="ml-3 h-5 w-5"
+            fill="currentColor"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 488 512"
+            aria-hidden="true">{viewed ? checkIcons.double : checkIcons.single}</svg>}
+        </div>
       </div>
-      <p className='text-justify'>{content}</p>
     </div>
   );
 };
@@ -49,7 +53,7 @@ const Chat: React.FunctionComponent<ChatProps> = () => {
 
   async function send() {
     if (!inputRef.current || !user.data || !curChat.chat) return;
-    if (!curChat.chat.ref) return;
+    if (!curChat.chat.ref || inputRef.current.innerText.length === 0) return;
     const message: MessageInterface = {
       sender: user.data.uid,
       timestamp: Timestamp.now(),
@@ -60,24 +64,29 @@ const Chat: React.FunctionComponent<ChatProps> = () => {
     inputRef.current.focus();
     await updateDoc(curChat.chat.ref, {
       messages: arrayUnion(message),
+      typing: arrayRemove(user.data.uid),
     });
   };
 
   useEffect(() => {
-    if (!curChat || !inputRef.current || !moveToRef.current) return;
-    inputRef.current.innerHTML = '';
+    if (!curChat.chat || !inputRef.current || !moveToRef.current) return;
     inputRef.current.focus();
     moveToRef.current.scrollIntoView({behavior: 'smooth', block: 'end'});
   }, [chats, curChat]);
 
   useEffect(() => {
-    const keyDownHandler = (event: KeyboardEvent) => {
+    const keyDownHandler = async (event: KeyboardEvent) => {
       if (event.key === 'Enter') {
         event.preventDefault();
         btnRef.current?.click();
       } else if (event.key === 'Escape' && inputRef.current) {
         event.preventDefault();
         inputRef.current.innerHTML = '';
+        if (curChat.chat && curChat.chat.ref) {
+          await updateDoc(curChat.chat.ref, {
+            typing: arrayRemove(user.data?.uid),
+          });
+        }
         selectCurChat();
       }
     };
@@ -86,6 +95,22 @@ const Chat: React.FunctionComponent<ChatProps> = () => {
       document.removeEventListener('keydown', keyDownHandler);
     };
   }, []);
+
+  const showInput = async () => {
+    if (!inputRef.current || !curChat.chat) return;
+    if (!curChat.chat.ref) return;
+
+    if (curChat.chat.typing && inputRef.current.innerText.length > 0) {
+      await updateDoc(curChat.chat.ref, {
+        typing: arrayUnion(user.data?.uid),
+      });
+    }
+    if (curChat.chat.typing && inputRef.current.innerText.length === 0) {
+      await updateDoc(curChat.chat.ref, {
+        typing: arrayRemove(user.data?.uid),
+      });
+    }
+  };
 
   if (!curChat.chat) {
     return (
@@ -109,6 +134,7 @@ const Chat: React.FunctionComponent<ChatProps> = () => {
             key={i+m.sender}
             own={m.sender === user.data?.uid}
             viewed={m.viewed}
+            timestamp={m.timestamp.toDate().toLocaleString('en-US', {timeZone: timezone})}
             content={m.content} />)}
           <div ref={moveToRef}/>
         </div>
@@ -116,6 +142,7 @@ const Chat: React.FunctionComponent<ChatProps> = () => {
 
       <div className='transition-all bg-slate-200 flex flex-row max-h-[30%]'>
         <span
+          onInput={showInput}
           ref={inputRef}
           role="textbox"
           contentEditable
