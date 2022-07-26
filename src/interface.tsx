@@ -5,6 +5,7 @@ export interface UserInterface {
     displayName: string
     photoURL: string
     uid: string
+    lastUpdate: Timestamp
 }
 
 export interface LocalChatInterface extends ChatInterface {

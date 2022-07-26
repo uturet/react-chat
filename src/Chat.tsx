@@ -1,5 +1,5 @@
 import React, {useRef, useEffect} from 'react';
-import {useUser} from 'reactfire';
+import {useFirestore, useUser} from 'reactfire';
 import {useChat} from './ChatContext';
 import {ChatInterface, MessageInterface} from './interface';
 import {
@@ -7,6 +7,7 @@ import {
   updateDoc,
   arrayUnion,
   arrayRemove,
+  doc,
 } from 'firebase/firestore';
 
 // eslint-disable-next-line new-cap
@@ -47,6 +48,7 @@ interface ChatProps {
 const Chat: React.FunctionComponent<ChatProps> = () => {
   const [chats, curChat, selectCurChat] = useChat();
   const user = useUser();
+  const db = useFirestore();
   const inputRef: {current: HTMLTextAreaElement|null} = useRef(null);
   const btnRef: {current: HTMLButtonElement|null} = useRef(null);
   const moveToRef: {current: HTMLDivElement|null} = useRef(null);
@@ -65,6 +67,11 @@ const Chat: React.FunctionComponent<ChatProps> = () => {
     await updateDoc(curChat.chat.ref, {
       messages: arrayUnion(message),
       typing: arrayRemove(user.data.uid),
+    }).then(async () => {
+      if (!user.data) return;
+      await updateDoc(doc(db, 'users', user.data.uid), {
+        lastUpdate: Timestamp.now(),
+      });
     });
   };
 
@@ -82,9 +89,14 @@ const Chat: React.FunctionComponent<ChatProps> = () => {
       } else if (event.key === 'Escape' && inputRef.current) {
         event.preventDefault();
         inputRef.current.innerHTML = '';
-        if (curChat.chat && curChat.chat.ref) {
+        if (curChat.chat && curChat.chat.ref && user.data) {
           await updateDoc(curChat.chat.ref, {
-            typing: arrayRemove(user.data?.uid),
+            typing: arrayRemove(user.data.uid),
+          }).then(async () => {
+            if (!user.data) return;
+            await updateDoc(doc(db, 'users', user.data.uid), {
+              lastUpdate: Timestamp.now(),
+            });
           });
         }
         selectCurChat();
@@ -103,12 +115,22 @@ const Chat: React.FunctionComponent<ChatProps> = () => {
     if (curChat.chat.typing && inputRef.current.innerText.length > 0) {
       await updateDoc(curChat.chat.ref, {
         typing: arrayUnion(user.data?.uid),
-      });
+      }).then(async () => {
+        if (!user.data) return;
+        await updateDoc(doc(db, 'users', user.data.uid), {
+          lastUpdate: Timestamp.now(),
+        });
+      }); ;
     }
     if (curChat.chat.typing && inputRef.current.innerText.length === 0) {
       await updateDoc(curChat.chat.ref, {
         typing: arrayRemove(user.data?.uid),
-      });
+      }).then(async () => {
+        if (!user.data) return;
+        await updateDoc(doc(db, 'users', user.data.uid), {
+          lastUpdate: Timestamp.now(),
+        });
+      }); ;
     }
   };
 

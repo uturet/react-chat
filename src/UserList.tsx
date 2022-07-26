@@ -15,8 +15,12 @@ interface UserItemProps {
   active: boolean
   typing: boolean
   onClick: () => void
+  chatData: {
+    unreadMsgs: number
+    lastMsg: string
+  }
 }
-export const UserItem: React.FunctionComponent<UserItemProps> = ({user, active, onClick, typing}) => {
+export const UserItem: React.FunctionComponent<UserItemProps> = ({user, active, onClick, typing, chatData}) => {
   return (
     <div onClick={onClick} className={`${active && 'bg-slate-600'} w-full h-[65px] border-solid border-slate-800 border-b-2 flex flex-row items-center px-3`}>
       <div className='w-10 h-10 relative'>
@@ -25,11 +29,11 @@ export const UserItem: React.FunctionComponent<UserItemProps> = ({user, active, 
       </div>
       <div className='ml-3 h-12'>
         <p className='font-semibold text-slate-300'>{user.displayName}</p>
-        {typing ? <p className='text-green-300'>Typing...</p> : <p className='text-slate-500'>Lorem ipsum dolor sit...</p>}
+        {typing ? <p className='text-green-300'>Typing...</p>: <p className='text-slate-500'>{chatData.lastMsg}</p>}
       </div>
-      <div className='ml-auto rounded-full h-6 w-6 bg-slate-800 flex items-center justify-center'>
-        <span className='font-semibold text-slate-300 text-xs'>10</span>
-      </div>
+      {chatData.unreadMsgs>0 && <div className='ml-auto rounded-full h-6 w-6 bg-slate-800 flex items-center justify-center'>
+        <span className='font-semibold text-slate-300 text-xs'>{chatData.unreadMsgs}</span>
+      </div>}
     </div>
   );
 };
@@ -42,7 +46,26 @@ const UserList: React.FunctionComponent<UserListProps> = ({displayUsers}) => {
   const user = useUser();
   const usersRef = collection(firestore, 'users');
   const {status, data: users} = useFirestoreCollectionData<UserInterface>(usersRef as CollectionReference<UserInterface>);
-  const [, curChat, selectCurChat, typingUsers] = useChat();
+  const [chats, curChat, selectCurChat, typingUsers] = useChat();
+
+  const getChatData = (u: UserInterface): {unreadMsgs: number, lastMsg: string} => {
+    const chatData = {
+      unreadMsgs: 0,
+      lastMsg: ''};
+    chats.every(((c) => {
+      if (c.users.includes(u.uid)) {
+        chatData.lastMsg = c.messages.length > 0 ? c.messages[c.messages.length-1].content.slice(0, 20) + '...': '';
+        for (let i = c.messages.length-1; i>-1; i--) {
+          if (c.messages[i].sender != u.uid) continue;
+          if (c.messages[i].viewed) break;
+          chatData.unreadMsgs++;
+        }
+        return false;
+      }
+      return true;
+    }));
+    return chatData;
+  };
 
   if (status === 'loading') {
     return <span>loading...</span>;
@@ -55,6 +78,7 @@ const UserList: React.FunctionComponent<UserListProps> = ({displayUsers}) => {
         onClick={() => selectCurChat(u)}
         active={Boolean(curChat.chat?.users.includes(u.uid))}
         user={u}
+        chatData={getChatData(u)}
         key={u.uid}/>)}
     </section>
   );

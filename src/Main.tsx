@@ -10,7 +10,7 @@ const Main = () => {
   return (
     <div className='relative h-screen'>
       <Header displayUsers={displayUsers} toggleDisplayUsers={toggleDisplayUsers}/>
-      <main className='flex flex-row w-screen h-screen absolute top-0 pt-[64px] overflow-hidden'>
+      <main className='flex flex-row w-screen h-screen mt-[-64px] top-0 pt-[64px] overflow-hidden'>
         <UserList displayUsers={displayUsers} />
         <Chat/>
       </main>
