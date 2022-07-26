@@ -48,8 +48,8 @@ const Chat: React.FunctionComponent<ChatProps> = () => {
   const moveToRef: {current: HTMLDivElement|null} = useRef(null);
 
   async function send() {
-    if (!inputRef.current || !user.data || !curChat) return;
-    if (!curChat.ref) return;
+    if (!inputRef.current || !user.data || !curChat.chat) return;
+    if (!curChat.chat.ref) return;
     const message: MessageInterface = {
       sender: user.data.uid,
       timestamp: Timestamp.now(),
@@ -58,7 +58,7 @@ const Chat: React.FunctionComponent<ChatProps> = () => {
     };
     inputRef.current.innerHTML = '';
     inputRef.current.focus();
-    await updateDoc(curChat.ref, {
+    await updateDoc(curChat.chat.ref, {
       messages: arrayUnion(message),
     });
   };
@@ -87,7 +87,7 @@ const Chat: React.FunctionComponent<ChatProps> = () => {
     };
   }, []);
 
-  if (!curChat) {
+  if (!curChat.chat) {
     return (
       <section className='bg-slate-600 w-full md:w-3/5 xl:w-3/4 h-auto'/>
     );
@@ -96,16 +96,16 @@ const Chat: React.FunctionComponent<ChatProps> = () => {
     <section className='bg-slate-600 w-full md:w-3/5 xl:w-3/4 h-auto flex flex-col'>
       <div className='w-full h-[65px] border-solid border-slate-800 border-b-2 flex flex-row items-center px-3'>
         <div className='w-10 h-10 relative'>
-          <img className='rounded-full' src={curChat.user?.photoURL} alt="User`s Photo" />
+          <img className='rounded-full' src={curChat.chat.user?.photoURL} alt="User`s Photo" />
         </div>
         <div className='ml-3 h-12'>
-          <p className='font-semibold text-slate-300'>{curChat.user?.displayName}</p>
+          <p className='font-semibold text-slate-300'>{curChat.chat.user?.displayName}</p>
         </div>
       </div>
 
       <div className='w-full flex-grow overflow-y-scroll scrollbar-hide'>
         <div className='flex flex-col justify-end '>
-          {curChat.messages.map((m, i) => <Message
+          {curChat.chat.messages.map((m, i) => <Message
             key={i+m.sender}
             own={m.sender === user.data?.uid}
             viewed={m.viewed}

@@ -53,7 +53,7 @@ const UserList: React.FunctionComponent<UserListProps> = ({displayUsers}) => {
       {users.map((u) => user.data?.uid == u.uid ? null : <UserItem
         typing={typingUsers.has(u.uid)}
         onClick={() => selectCurChat(u)}
-        active={Boolean(curChat?.users.includes(u.uid))}
+        active={Boolean(curChat.chat?.users.includes(u.uid))}
         user={u}
         key={u.uid}/>)}
     </section>
