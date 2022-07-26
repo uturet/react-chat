@@ -1,3 +1,5 @@
+import {Timestamp, DocumentReference, DocumentData} from 'firebase/firestore';
+
 export interface UserInterface {
     online: boolean
     displayName: string
@@ -5,16 +7,20 @@ export interface UserInterface {
     uid: string
 }
 
+export interface LocalChatInterface extends ChatInterface {
+    user: UserInterface
+}
+
 export interface ChatInterface {
-    user?: UserInterface // not stored
     users: string[] // uid[]
     typing: string[] // uid[]
     messages: MessageInterface[]
+    ref?: DocumentReference<DocumentData>
 }
 
 export interface MessageInterface {
     sender: string // user.uid
-    timestamp: number
+    timestamp: Timestamp
     viewed: boolean
     content: string
 }

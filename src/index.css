@@ -27,3 +27,13 @@
     border: none;
     border-radius: none;
 }
+
+/* .message-metadata:before {
+    content: '' ;
+    display:block;
+    float: right;
+} */
+
+.message-metadata span {
+    clear: both;
+}
