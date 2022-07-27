@@ -10,6 +10,10 @@ src/firebaseConfig.ts
 # testing
 /coverage
 
+.firebase*
+firebase.json
+.github
+
 # production
 /build
 

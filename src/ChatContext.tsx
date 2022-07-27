@@ -72,9 +72,40 @@ const ChatProvider = (props: any) => {
     });
   }, [user]);
 
+  const getOrCreateChat = async (uids: [string, string], u: UserInterface) => {
+    const q = query(collection(firestore, 'chats'), where('users', 'array-contains', uids));
+    onSnapshot(q, async (querySnapshot) => {
+      if (querySnapshot.size > 0) {
+        querySnapshot.forEach((doc) => {
+          const c = doc.data() as ChatInterface;
+          c.ref = doc.ref;
+          c.typing.forEach((uid) => setTypingUsers((prev) => {
+            prev.add(uid);
+            return prev;
+          }));
+          setChats((prev) => [...prev, c]);
+          if (curChat.chat && c.users.includes(curChat.chat.user.uid)) {
+            dispatchCurChat({type: 'update', chat: {...c, user: curChat.chat.user}});
+          }
+        });
+      } else {
+        const docRef = await addDoc(collection(firestore, 'chats'), {
+          users: [u.uid, user.data?.uid],
+          typing: [],
+          messages: [],
+        });
+        onSnapshot(docRef, (doc) => {
+          const c = doc.data() as ChatInterface;
+          c.ref = docRef;
+          chats.push(c);
+          dispatchCurChat({type: 'set', chat: {...c, user: u}});
+        });
+      }
+    });
+  };
 
   const selectCurChat = async (u?: UserInterface) => {
-    if (u === undefined) {
+    if (u === undefined || !user.data) {
       dispatchCurChat({type: 'empty'});
       return;
     }
@@ -85,6 +116,7 @@ const ChatProvider = (props: any) => {
         return;
       }
     }
+
     const tmpCurChat: LocalChatInterface = {
       users: [u.uid],
       typing: [],
@@ -92,17 +124,7 @@ const ChatProvider = (props: any) => {
       messages: [],
     };
     dispatchCurChat({type: 'set', chat: tmpCurChat});
-    const docRef = await addDoc(collection(firestore, 'chats'), {
-      users: [u.uid, user.data?.uid],
-      typing: [],
-      messages: [],
-    });
-    onSnapshot(docRef, (doc) => {
-      const c = doc.data() as ChatInterface;
-      c.ref = docRef;
-      chats.push(c);
-      dispatchCurChat({type: 'set', chat: {...c, user: u}});
-    });
+    getOrCreateChat([u.uid, user.data.uid], u);
   };
 
   return <ChatContext.Provider

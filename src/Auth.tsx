@@ -79,6 +79,7 @@ const Auth = () => {
       photoURL: result.user.photoURL,
       uid: result.user.uid,
       chats: [],
+      lastUpdate: Timestamp.now(),
     });
   };
 
