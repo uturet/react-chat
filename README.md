@@ -1,31 +1,17 @@
-# Realtime Chat App with React and Firebase
+# Realtime Chat App
 
-### Database Structure
 
-```js
-{
-    users: User[]
-    chats: Chat[]
-}
+![Chat in use](./ReactChat.GIF)
 
-User {
-    online: boolean
-    typing: boolean
-    chats: [
-        {
-            user: User_reference
-            chat: Chat_reference
-        }
-    ]
-}
+### [Demo](https://fir-basics-de628.web.app/)
 
-Chat {
-    message: Message[]
-}
+### Features
+- Login with Google
+- User is online
+- User is typing
+- Unread messages counter
 
-Message {
-    timestamp: timestamp
-    viewed: boolean
-    content: string
-}
-```
+### Technologies
+- TypeScript
+- React
+- Firebase
