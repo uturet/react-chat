@@ -106,7 +106,7 @@ const Chat: React.FunctionComponent<ChatProps> = () => {
     return () => {
       document.removeEventListener('keydown', keyDownHandler);
     };
-  }, []);
+  });
 
   const showInput = async () => {
     if (!inputRef.current || !curChat.chat) return;

@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React from 'react';
 import {
   useFirestore,
   useFirestoreCollectionData,
@@ -50,10 +50,6 @@ const UserList: React.FunctionComponent<UserListProps> = ({displayUsers}) => {
   const {status, data: users} = useFirestoreCollectionData<UserInterface>(usersRef as CollectionReference<UserInterface>);
   const [chats, curChat, selectCurChat, typingUsers] = useChat();
   const curTime = Timestamp.now().seconds;
-
-  useEffect(() => {
-    console.log(users);
-  }, [users]);
 
   const getChatData = (u: UserInterface): {unreadMsgs: number, lastMsg: string} => {
     const chatData = {
